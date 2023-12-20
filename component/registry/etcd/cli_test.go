@@ -8,12 +8,12 @@ import (
 
 func TestInit(t *testing.T) {
 	testKey := "test/abc"
-	_, err := cli.Put(context.TODO(), testKey, "abc")
+	_, err := Ins.cli.Put(context.TODO(), testKey, "abc")
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	get, err := cli.Get(context.TODO(), testKey)
+	get, err := Ins.cli.Get(context.TODO(), testKey)
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -22,7 +22,7 @@ func TestInit(t *testing.T) {
 	for _, kv := range get.Kvs {
 		fmt.Println("kv str: ", kv.String())
 	}
-	_, err = cli.Delete(context.TODO(), testKey)
+	_, err = Ins.cli.Delete(context.TODO(), testKey)
 	if err != nil {
 		t.Fatal(err)
 		return
