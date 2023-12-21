@@ -1,3 +1,4 @@
 registry:
+  identity: "local.test"
   etcd:
     endpoints: ["10.11.21.50:12379","10.11.21.50:12381","10.11.21.50:12383"]

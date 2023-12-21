@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/junqirao/gateway/model"
 	"testing"
+	"time"
 )
 
 var (
@@ -66,4 +67,9 @@ func TestRegister(t *testing.T) {
 
 	Register(&srd)
 	runDefaultServer()
+}
+
+func TestInit(t *testing.T) {
+	Init()
+	time.Sleep(time.Second)
 }

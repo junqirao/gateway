@@ -51,6 +51,7 @@ func (i *instance) Subscribe(ctx context.Context, key string, handler event.Watc
 		ops = append(ops, clientv3.WithPrefix())
 	}
 	go func() {
+		g.Log().Infof(ctx, "subscribe value change of key(prefix:%v): %v", hasPrefix, key)
 		watchChan := i.cli.Watch(ctx, key, ops...)
 		for {
 			select {
