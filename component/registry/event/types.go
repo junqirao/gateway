@@ -1,3 +1,9 @@
 package event
 
-type Handler func(key string, value []byte)
+// Watcher of key
+type Watcher interface {
+	// OnChange of key
+	OnChange(key string, value []byte)
+	// OnClose watcher
+	OnClose(err error)
+}

@@ -4,8 +4,10 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/glog"
+	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/junqirao/gateway/component/registry/event"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"strings"
 )
 
 var (
@@ -34,31 +36,68 @@ func init() {
 		glog.DefaultLogger().Panicf(ctx, "etcd client init failed: %v", err)
 		return
 	}
-	Ins = &instance{cli: cli, watch: make(map[string]clientv3.WatchChan)}
+	Ins = &instance{cli: cli}
 }
 
 type instance struct {
-	cli   *clientv3.Client
-	watch map[string]clientv3.WatchChan
+	cli *clientv3.Client
 }
 
-func (i *instance) watchHandler(watchChan clientv3.WatchChan, handler event.Handler) {
-	for {
-		select {
-		case resp := <-watchChan:
-			if resp.Canceled {
-				return
-			}
-			for _, ev := range resp.Events {
-				handler(string(ev.Kv.Key), ev.Kv.Value)
-			}
-		default:
-
-		}
+// Subscribe a key
+func (i *instance) Subscribe(ctx context.Context, key string, handler event.Watcher) {
+	var ops []clientv3.OpOption
+	hasPrefix := strings.HasSuffix(key, "/")
+	if hasPrefix {
+		ops = append(ops, clientv3.WithPrefix())
 	}
+	go func() {
+		watchChan := i.cli.Watch(ctx, key, ops...)
+		for {
+			select {
+			case resp := <-watchChan:
+				if resp.Canceled {
+					handler.OnClose(resp.Err())
+					return
+				}
+				for _, ev := range resp.Events {
+					k := string(ev.Kv.Key)
+					if hasPrefix {
+						k = strings.TrimPrefix(k, key)
+					}
+					handler.OnChange(k, ev.Kv.Value)
+				}
+			case <-ctx.Done():
+				handler.OnClose(nil)
+				return
+			default:
+
+			}
+		}
+	}()
+	return
 }
 
-func (i *instance) Subscribe(ctx context.Context, key string, handler event.Handler) {
-	go i.watchHandler(i.cli.Watch(ctx, key), handler)
+// Set key and value
+func (i *instance) Set(ctx context.Context, key string, value interface{}) (err error) {
+	_, err = i.cli.Put(ctx, key, gconv.String(value))
+	return
+}
+
+// Get by key
+func (i *instance) Get(ctx context.Context, key string) (m map[string]string, err error) {
+	resp, err := i.cli.Get(ctx, key)
+	if err != nil {
+		return
+	}
+	m = make(map[string]string)
+	for _, value := range resp.Kvs {
+		m[string(value.Key)] = string(value.Value)
+	}
+	return
+}
+
+// Delete by key
+func (i *instance) Delete(ctx context.Context, key string) (err error) {
+	_, err = i.cli.Delete(ctx, key)
 	return
 }
