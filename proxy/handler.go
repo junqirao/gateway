@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/junqirao/gateway/lib/response"
 	"github.com/junqirao/gateway/model"
 	"net"
 	"net/http"
@@ -73,10 +74,10 @@ func (h *Handler) errorHandler(writer http.ResponseWriter, request *http.Request
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusBadGateway)
 
-	if b, err := json.Marshal(model.JSONResponse{
-		Code: http.StatusBadGateway,
-		Data: request.URL.String(),
-		Msg:  err.Error(),
+	if b, err := json.Marshal(response.JSON{
+		Code:    http.StatusBadGateway,
+		Data:    request.URL.String(),
+		Message: err.Error(),
 	}); err != nil {
 		panic(gerror.Wrap(err, `WriteJson failed`))
 	} else {

@@ -3,7 +3,6 @@ package etcd
 import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/junqirao/gateway/component/registry/event"
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -20,20 +19,20 @@ func init() {
 	ctx := context.Background()
 	v, err := g.Cfg().Get(ctx, "registry.etcd")
 	if err != nil {
-		glog.DefaultLogger().Panicf(ctx, "etcd read config failed: %v", err)
+		g.Log().Panicf(ctx, "etcd read config failed: %v", err)
 		return
 	}
 
 	cfg := new(Config)
 	err = v.Struct(&cfg)
 	if err != nil {
-		glog.DefaultLogger().Panicf(ctx, "etcd parse config failed: %v", err)
+		g.Log().Panicf(ctx, "etcd parse config failed: %v", err)
 		return
 	}
 
 	cli, err := clientv3.New(*cfg)
 	if err != nil {
-		glog.DefaultLogger().Panicf(ctx, "etcd client init failed: %v", err)
+		g.Log().Panicf(ctx, "etcd client init failed: %v", err)
 		return
 	}
 	Ins = &instance{cli: cli}
@@ -86,13 +85,23 @@ func (i *instance) Set(ctx context.Context, key string, value interface{}) (err 
 
 // Get by key
 func (i *instance) Get(ctx context.Context, key string) (m map[string]string, err error) {
-	resp, err := i.cli.Get(ctx, key)
+	var ops []clientv3.OpOption
+	hasPrefix := strings.HasSuffix(key, "/")
+	if hasPrefix {
+		ops = append(ops, clientv3.WithPrefix())
+	}
+
+	resp, err := i.cli.Get(ctx, key, ops...)
 	if err != nil {
 		return
 	}
 	m = make(map[string]string)
 	for _, value := range resp.Kvs {
-		m[string(value.Key)] = string(value.Value)
+		k := string(value.Key)
+		if hasPrefix {
+			k = strings.TrimPrefix(k, key)
+		}
+		m[k] = string(value.Value)
 	}
 	return
 }

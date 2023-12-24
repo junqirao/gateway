@@ -34,7 +34,9 @@ func (j JSON) WithMessage(message string) JSON {
 }
 
 func (j JSON) WithDetail(detail interface{}) JSON {
-	j.Message = fmt.Sprintf("%s: %s", j.Message, detail)
+	if detail != nil {
+		j.Message = fmt.Sprintf("%s: %s", j.Message, detail)
+	}
 	return j
 }
 
