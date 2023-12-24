@@ -29,20 +29,20 @@ func init() {
 }
 
 // VerifySignature
-// response.DefaultRequestTimeoutResponse when
+// response.CodeRequestTimeoutResponse when
 // X-Timestamp - time.Now > defaultTimestampGap, disabled when debug = true
-// response.DefaultUnauthorizedResponse when signature mismatch
+// response.CodeUnauthorizedResponse when signature mismatch
 func VerifySignature(secret string) func(r *ghttp.Request) {
 	return func(r *ghttp.Request) {
 		timestamp := gconv.Int64(r.GetHeader("X-Timestamp"))
 		if !debug {
 			if v := time.Now().Unix() - timestamp; v <= 0 || v > defaultTimestampGap {
-				response.Error(r, response.DefaultRequestTimeoutResponse)
+				response.Error(r, response.CodeRequestTimeoutResponse)
 				return
 			}
 		}
 		if sign(r.GetHeader("X-Nonce"), r.GetHeader("X-Timestamp"), secret) != r.GetHeader("X-Signature") {
-			response.Error(r, response.DefaultUnauthorizedResponse.WithDetail("signature mismatch"))
+			response.Error(r, response.CodeUnauthorizedResponse.WithDetail("signature mismatch"))
 			return
 		}
 		r.Middleware.Next()
@@ -58,7 +58,7 @@ func CheckIpWhitelist(whitelist string) func(r *ghttp.Request) {
 	return func(r *ghttp.Request) {
 		_, ok := ipWhitelist.Load(r.GetClientIp())
 		if !ok {
-			response.Error(r, response.DefaultBlockedResponse.WithDetail("ip address not allowed"))
+			response.Error(r, response.CodeBlockedResponse.WithDetail("ip address not allowed"))
 			return
 		}
 		r.Middleware.Next()

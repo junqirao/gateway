@@ -2,14 +2,17 @@ package response
 
 import "net/http"
 
-// default
+// default code define
 var (
-	DefaultRequestTimeoutResponse = NewJSONResp(http.StatusRequestTimeout, -3, "request timeout")
-	DefaultBlockedResponse        = NewJSONResp(http.StatusForbidden, -2, "blocked")
-	DefaultUnauthorizedResponse   = NewJSONResp(http.StatusForbidden, -1, "unauthorized")
-	DefaultSuccessResponse        = NewJSONResp(http.StatusOK, 0, "success")
-	DefaultFailedResponse         = NewJSONResp(http.StatusBadRequest, 1, "unknown error")
+	CodeRequestTimeoutResponse = NewJSONResp(http.StatusRequestTimeout, -4, "request timeout")
+	CodeBlockedResponse        = NewJSONResp(http.StatusForbidden, -3, "blocked")
+	CodeUnauthorizedResponse   = NewJSONResp(http.StatusForbidden, -2, "unauthorized")
+	CodeDefaultFailedResponse  = NewJSONResp(http.StatusBadRequest, -1, "unknown error")
+	CodeDefaultSuccessResponse = NewJSONResp(http.StatusOK, 0, "success")
+)
 
+// business code define
+var (
 	ErrorInvalidParams         = NewJSONResp(http.StatusBadRequest, 1000, "invalid parameters")
 	ErrorResourceNotFound      = NewJSONResp(http.StatusNotFound, 1001, "requested resource not found")
 	ErrorOperationNotAllowed   = NewJSONResp(http.StatusBadRequest, 1002, "operation not allowed")

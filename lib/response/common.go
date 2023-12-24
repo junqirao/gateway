@@ -46,7 +46,7 @@ func WithCode(code int) Option {
 
 // Success response with default status code http.StatusOK
 func Success(r *ghttp.Request, opts ...Option) {
-	resp := DefaultSuccessResponse
+	resp := CodeDefaultSuccessResponse
 	for i := range opts {
 		opts[i](&resp)
 	}
@@ -57,7 +57,7 @@ func Success(r *ghttp.Request, opts ...Option) {
 
 // Data response with default status code http.StatusOK and data
 func Data(r *ghttp.Request, data interface{}, opts ...Option) {
-	resp := DefaultSuccessResponse
+	resp := CodeDefaultSuccessResponse
 	for i := range opts {
 		opts[i](&resp)
 	}
@@ -68,7 +68,7 @@ func Data(r *ghttp.Request, data interface{}, opts ...Option) {
 
 // Error response with default status code http.StatusBadRequest
 func Error(r *ghttp.Request, err error, opts ...Option) {
-	resp := DefaultFailedResponse
+	resp := CodeDefaultFailedResponse
 	if r, ok := err.(JSON); ok {
 		resp = r
 	}
@@ -85,9 +85,9 @@ func Error(r *ghttp.Request, err error, opts ...Option) {
 // Result response both data and error.
 // if error not nil it response default status http.StatusOK,else http.StatusBadRequest
 func Result(r *ghttp.Request, err error, data interface{}, opts ...Option) {
-	resp := DefaultSuccessResponse
+	resp := CodeDefaultSuccessResponse
 	if err != nil {
-		resp = DefaultFailedResponse
+		resp = CodeDefaultFailedResponse
 		resp.Message = err.Error()
 	}
 	resp.Data = data
