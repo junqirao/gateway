@@ -17,7 +17,5 @@ func serverManagementRouters(group *ghttp.RouterGroup) {
 		group.DELETE("/{name}", api.ServerMgr.Delete)
 		// config
 		group.POST("/config/{name}", api.ServerMgr.UpdateConfig)
-		// status
-		group.POST("/status/{name}", api.ServerMgr.UpdateStatus)
 	})
 }

@@ -96,32 +96,7 @@ func (a *serverMgrApi) UpdateConfig(r *ghttp.Request) {
 		return
 	}
 
-	data, err := server.SetConfig(ctx, req.Name, req.Config)
-	if err != nil {
-		response.Error(r, err)
-		return
-	}
-	response.Data(r, data)
-}
-
-// UpdateStatus
-// @Tags ServerMgr
-// @Summary delete server config
-// @Param name path string true "server name"
-// @Param entity body ServerStatusUpdateReq true "body"
-// @Success 200 {object} response.JSON{} ""
-// @Router /management/server/status/{name} [post]
-func (a *serverMgrApi) UpdateStatus(r *ghttp.Request) {
-	ctx := r.Context()
-	req := new(ServerUpdateStatusReq)
-	err := r.Parse(&req)
-	if err != nil {
-		a.logger.Warningf(ctx, "serverMgrApi.UpdateStatus params parse error : %s", err)
-		response.Error(r, response.ErrorInvalidParams, response.WithMessage(err.Error()))
-		return
-	}
-
-	data, err := server.SetStatus(ctx, req.Name, req.Status)
+	data, err := server.SetConfig(ctx, req.Name, req.ServerConfig)
 	if err != nil {
 		response.Error(r, err)
 		return

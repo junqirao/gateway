@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	"time"
+	"github.com/gogf/gf/v2/util/guid"
 )
 
 const (
@@ -40,7 +40,7 @@ func setup(ctx context.Context, cfg *Config) {
 		debug = v.Bool()
 	}
 
-	sName := fmt.Sprintf("%s.%d", serverIdentity, time.Now().UnixMilli())
+	sName := fmt.Sprintf("%s.%s", serverIdentity, guid.S())
 	server := g.Server(sName)
 	if cfg.Address != "" {
 		server.SetAddr(cfg.Address)

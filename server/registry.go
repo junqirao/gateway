@@ -9,33 +9,7 @@ import (
 
 var (
 	configRegistryKey = g.Cfg().MustGet(context.Background(), "registry.identity", "local.undefined").String() + "/server/config/"
-	statusRegistryKey = g.Cfg().MustGet(context.Background(), "registry.identity", "local.undefined").String() + "/server/status/"
 )
-
-func registryStatusHandler(ctx context.Context, name, str string) {
-	if str == "" {
-		return
-	}
-	var err error
-
-	st := new(model.ServerStatus)
-	if err = json.Unmarshal([]byte(str), &st); err != nil {
-		g.Log().Warningf(ctx, "load server status [%s](value=%s) failed: %v", name, str, err)
-		return
-	}
-
-	ins, ok := GetInstance(name)
-	if !ok {
-		return
-	}
-
-	if err = ins.UpdateStatus(ctx, st); err != nil {
-		g.Log().Warningf(ctx, "update server(%s) status failed: %v", name, err)
-	} else {
-		g.Log().Infof(ctx, "update server(%s) status success: enabled=%v", name, st.Enabled)
-	}
-	return
-}
 
 func registryConfigHandler(ctx context.Context, name, cfgStr string) {
 	var err error

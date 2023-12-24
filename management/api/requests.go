@@ -9,12 +9,6 @@ type ServerOperationReq struct {
 	Name string `json:"name" dc:"server name"`
 }
 
-// ServerCreateReq ...
-type ServerCreateReq struct {
-	Config *model.ServerConfig `json:"config"`
-	Status *model.ServerStatus `json:"status"`
-}
-
 // ServerGetReq ...
 type ServerGetReq struct {
 	ServerOperationReq
@@ -27,12 +21,6 @@ type ServerDeleteReq struct {
 
 // ServerUpdateConfigReq ...
 type ServerUpdateConfigReq struct {
-	Name   string              `json:"name" swaggerignore:"true"`
-	Config *model.ServerConfig `json:"config"`
-}
-
-// ServerUpdateStatusReq ...
-type ServerUpdateStatusReq struct {
-	Name   string              `json:"name" swaggerignore:"true"`
-	Status *model.ServerStatus `json:"status"`
+	Name                string `json:"name" swaggerignore:"true"`
+	*model.ServerConfig `json:"config"`
 }

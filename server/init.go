@@ -11,7 +11,6 @@ func Init() {
 
 	// watcher
 	registry.Instance().Subscribe(context.TODO(), configRegistryKey, new(serverConfigWatcher))
-	registry.Instance().Subscribe(context.TODO(), statusRegistryKey, new(serverStatusWatcher))
 }
 
 func loadFromRegistry(ctx context.Context) {
@@ -22,13 +21,5 @@ func loadFromRegistry(ctx context.Context) {
 
 	for name, s := range cfgMap {
 		registryConfigHandler(ctx, name, s)
-	}
-
-	statusMap, err := registry.Instance().Get(ctx, statusRegistryKey)
-	if err != nil {
-		return
-	}
-	for name, s := range statusMap {
-		registryStatusHandler(ctx, name, s)
 	}
 }

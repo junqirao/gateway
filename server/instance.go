@@ -25,7 +25,7 @@ func GetInstance(name string) (i *Instance, ok bool) {
 }
 
 // Register of server instance
-func Register(_ context.Context, name string, config *model.ServerConfig) (i *Instance, err error) {
+func Register(ctx context.Context, name string, config *model.ServerConfig) (i *Instance, err error) {
 	_, ok := insMap.Load(name)
 	if ok {
 		err = response.ErrorResourceAlreadyExists.WithDetail(name)
@@ -34,6 +34,9 @@ func Register(_ context.Context, name string, config *model.ServerConfig) (i *In
 
 	i = NewInstance(name, config)
 	insMap.Store(name, i)
+	if config.Enabled {
+		err = i.Start(ctx)
+	}
 	return
 }
 
@@ -75,6 +78,7 @@ type Instance struct {
 	cfg  *model.ServerConfig
 }
 
+// NewInstance constructor
 func NewInstance(name string, cfg *model.ServerConfig) *Instance {
 	return &Instance{
 		name: name,
@@ -117,18 +121,22 @@ func (i *Instance) Stop(ctx context.Context) (err error) {
 	return
 }
 
-// UpdateConfig of http server, take effect after restart
-func (i *Instance) UpdateConfig(_ context.Context, cfg *model.ServerConfig) (err error) {
-	i.cfg = cfg
-	return
-}
+// UpdateConfig of http server
+func (i *Instance) UpdateConfig(ctx context.Context, cfg *model.ServerConfig) (err error) {
+	enabledChanges := i.cfg.Enabled != cfg.Enabled
+	propertiesChanges := i.cfg.Properties != nil
 
-// UpdateStatus of http server
-func (i *Instance) UpdateStatus(ctx context.Context, status *model.ServerStatus) (err error) {
-	if status.Enabled {
-		err = i.Start(ctx)
-	} else {
-		err = i.Stop(ctx)
+	if propertiesChanges {
+		i.cfg.Properties = cfg.Properties
+	}
+
+	if enabledChanges {
+		i.cfg.Enabled = cfg.Enabled
+		if i.cfg.Enabled {
+			err = i.Start(ctx)
+		} else {
+			err = i.Stop(ctx)
+		}
 	}
 	return
 }

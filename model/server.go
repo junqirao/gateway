@@ -8,18 +8,18 @@ import (
 
 // ServerInfo ...
 type ServerInfo struct {
-	Name   string        `json:"name"`
-	Config *ServerConfig `json:"config"`
-	Status *ServerStatus `json:"status"`
-}
+	ServerConfig
 
-// ServerStatus ...
-type ServerStatus struct {
-	Enabled bool `json:"enabled"`
+	Name string `json:"name"`
 }
 
 // ServerConfig ...
 type ServerConfig struct {
+	Enabled    bool              `json:"enabled"`
+	Properties *ServerProperties `json:"properties"`
+}
+
+type ServerProperties struct {
 	// Address specifies the server listening address like "port" or ":port",
 	// multiple addresses joined using ','.
 	Address string `json:"address"`
@@ -84,44 +84,50 @@ type ServerConfig struct {
 	ClientMaxBodySize string `json:"client_max_body_size"`
 }
 
-func (c ServerConfig) C(name string) ghttp.ServerConfig {
+func (c *ServerConfig) FillDefault() {
+	if c.Properties == nil {
+		return
+	}
+	if c.Properties.ClientMaxBodySize == "" {
+		c.Properties.ClientMaxBodySize = "8m"
+	}
+}
+
+func (c *ServerConfig) C(name string) ghttp.ServerConfig {
 	config := ghttp.NewConfig()
 	config.Name = name
-	if c.ReadTimeout > 0 {
-		config.ReadTimeout = time.Duration(c.ReadTimeout)
+	if c.Properties.ReadTimeout > 0 {
+		config.ReadTimeout = time.Duration(c.Properties.ReadTimeout)
 	}
-	if c.IdleTimeout > 0 {
-		config.IdleTimeout = time.Duration(c.IdleTimeout)
+	if c.Properties.IdleTimeout > 0 {
+		config.IdleTimeout = time.Duration(c.Properties.IdleTimeout)
 	}
-	if c.WriteTimeout > 0 {
-		config.WriteTimeout = time.Duration(c.WriteTimeout)
-	}
-
-	if config.KeepAlive != c.KeepAlive {
-		config.KeepAlive = c.KeepAlive
-	}
-	if c.MaxHeaderBytes > 0 {
-		config.MaxHeaderBytes = c.MaxHeaderBytes
+	if c.Properties.WriteTimeout > 0 {
+		config.WriteTimeout = time.Duration(c.Properties.WriteTimeout)
 	}
 
-	if c.ClientMaxBodySize == "" {
-		c.ClientMaxBodySize = "8m"
+	if config.KeepAlive != c.Properties.KeepAlive {
+		config.KeepAlive = c.Properties.KeepAlive
 	}
-	config.Address = c.Address
-	config.HTTPSAddr = c.HTTPSAddr
-	config.Endpoints = c.Endpoints
-	config.HTTPSCertPath = c.HTTPSCertPath
-	config.HTTPSKeyPath = c.HTTPSKeyPath
+	if c.Properties.MaxHeaderBytes > 0 {
+		config.MaxHeaderBytes = c.Properties.MaxHeaderBytes
+	}
 
-	config.ServerAgent = c.ServerAgent
-	config.LogPath = c.LogPath
-	config.LogLevel = c.LogLevel
-	config.ErrorStack = c.ErrorStack
-	config.ErrorLogEnabled = c.ErrorLogEnabled
-	config.ErrorLogPattern = c.ErrorLogPattern
-	config.AccessLogEnabled = c.AccessLogEnabled
-	config.AccessLogPattern = c.AccessLogPattern
-	config.ClientMaxBodySize = gfile.StrToSize(c.ClientMaxBodySize)
+	config.Address = c.Properties.Address
+	config.HTTPSAddr = c.Properties.HTTPSAddr
+	config.Endpoints = c.Properties.Endpoints
+	config.HTTPSCertPath = c.Properties.HTTPSCertPath
+	config.HTTPSKeyPath = c.Properties.HTTPSKeyPath
+
+	config.ServerAgent = c.Properties.ServerAgent
+	config.LogPath = c.Properties.LogPath
+	config.LogLevel = c.Properties.LogLevel
+	config.ErrorStack = c.Properties.ErrorStack
+	config.ErrorLogEnabled = c.Properties.ErrorLogEnabled
+	config.ErrorLogPattern = c.Properties.ErrorLogPattern
+	config.AccessLogEnabled = c.Properties.AccessLogEnabled
+	config.AccessLogPattern = c.Properties.AccessLogPattern
+	config.ClientMaxBodySize = gfile.StrToSize(c.Properties.ClientMaxBodySize)
 
 	// default config
 	config.DumpRouterMap = false
