@@ -4,12 +4,16 @@ import (
 	"strings"
 )
 
+// ServerGroup ...
+type ServerGroup struct {
+	ServerName string     `json:"server_name"`
+	Group      *GroupInfo `json:"group"`
+}
+
 // ServiceRegisterData ...
 type ServiceRegisterData struct {
-	ServerName string      `json:"server_name"`  // server name
-	Group      GroupInfo   `json:"group_info"`   // group info
-	Service    ServiceInfo `json:"service_info"` // service info
-	Callback   string      `json:"callback"`     // callback url, pushing register result: response.JSON, success(code=0), failure(code>0)
+	ServerGroup
+	Service ServiceInfo `json:"service_info"` // service info
 }
 
 // RouterPattern returns router pattern in /{group.name}/{service.name}/*

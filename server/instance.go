@@ -140,3 +140,8 @@ func (i *Instance) UpdateConfig(ctx context.Context, cfg *model.ServerConfig) (e
 	}
 	return
 }
+
+// Srv returns http server
+func (i *Instance) Srv() *ghttp.Server {
+	return i.srv
+}
