@@ -2,7 +2,10 @@ module github.com/junqirao/gateway
 
 go 1.19
 
-require github.com/gogf/gf/v2 v2.5.7
+require (
+	github.com/gogf/gf/v2 v2.5.7
+	go.etcd.io/etcd/client/v3 v3.5.11
+)
 
 require (
 	github.com/BurntSushi/toml v1.2.0 // indirect
@@ -25,7 +28,6 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.11 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.11 // indirect
-	go.etcd.io/etcd/client/v3 v3.5.11 // indirect
 	go.opentelemetry.io/otel v1.14.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.14.0 // indirect
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect

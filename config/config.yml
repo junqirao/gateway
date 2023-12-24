@@ -1,4 +1,11 @@
+debug: true
+
 registry:
   identity: "local.test"
   etcd:
-    endpoints: ["10.11.21.50:12379","10.11.21.50:12381","10.11.21.50:12383"]
+    endpoints: [ "10.11.21.50:12379","10.11.21.50:12381","10.11.21.50:12383" ]
+
+management:
+  address:
+  port: 9999
+  enabled: true
