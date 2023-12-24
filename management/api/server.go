@@ -23,7 +23,7 @@ type serverMgrApi struct {
 // @Router /management/server/list[get]
 func (a *serverMgrApi) List(r *ghttp.Request) {
 	ctx := r.Context()
-	data, err := server.List(ctx)
+	data, err := server.ListServerInfo(ctx)
 	if err != nil {
 		response.Error(r, err)
 		return
@@ -42,12 +42,12 @@ func (a *serverMgrApi) Get(r *ghttp.Request) {
 	req := new(ServerGetReq)
 	err := r.Parse(&req)
 	if err != nil {
-		a.logger.Warningf(ctx, "serverMgrApi.Get params parse error : %s", err)
+		a.logger.Warningf(ctx, "serverMgrApi.GetServerInfo params parse error : %s", err)
 		response.Error(r, response.ErrorInvalidParams, response.WithMessage(err.Error()))
 		return
 	}
 
-	data, err := server.Get(ctx, req.Name)
+	data, err := server.GetServerInfo(ctx, req.Name)
 	if err != nil {
 		response.Error(r, err)
 		return
@@ -66,12 +66,12 @@ func (a *serverMgrApi) Delete(r *ghttp.Request) {
 	req := new(ServerDeleteReq)
 	err := r.Parse(&req)
 	if err != nil {
-		a.logger.Warningf(ctx, "serverMgrApi.Delete params parse error : %s", err)
+		a.logger.Warningf(ctx, "serverMgrApi.DeleteConfig params parse error : %s", err)
 		response.Error(r, response.ErrorInvalidParams, response.WithMessage(err.Error()))
 		return
 	}
 
-	data, err := server.Delete(ctx, req.Name)
+	data, err := server.DeleteConfig(ctx, req.Name)
 	if err != nil {
 		response.Error(r, err)
 		return

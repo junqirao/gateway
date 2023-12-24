@@ -10,8 +10,8 @@ import (
 	"github.com/junqirao/gateway/model"
 )
 
-// List server info
-func List(ctx context.Context) (infos []*model.ServerInfo, err error) {
+// ListServerInfo server info
+func ListServerInfo(ctx context.Context) (infos []*model.ServerInfo, err error) {
 	infos = make([]*model.ServerInfo, 0)
 
 	cfgMap, err := registry.Instance().Get(ctx, configRegistryKey)
@@ -35,8 +35,8 @@ func List(ctx context.Context) (infos []*model.ServerInfo, err error) {
 	return
 }
 
-// Get server info
-func Get(ctx context.Context, name string) (rsp interface{}, err error) {
+// GetServerInfo server info
+func GetServerInfo(ctx context.Context, name string) (rsp interface{}, err error) {
 	cfg := new(model.ServerConfig)
 	if err = getRegistryOne(ctx, fmt.Sprintf("%s%s", configRegistryKey, name), &cfg); err != nil {
 		return
@@ -71,8 +71,8 @@ func getRegistryOne(ctx context.Context, key string, ptr interface{}) (err error
 	return
 }
 
-// Delete ...
-func Delete(ctx context.Context, name string) (rsp interface{}, err error) {
+// DeleteConfig ...
+func DeleteConfig(ctx context.Context, name string) (rsp interface{}, err error) {
 	if err = getRegistryOne(ctx, fmt.Sprintf("%s%s", configRegistryKey, name), nil); err != nil {
 		return
 	}
