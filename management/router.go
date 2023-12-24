@@ -1,11 +1,26 @@
 package management
 
 import (
+	"context"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/junqirao/gateway/management/api"
+	"github.com/junqirao/gateway/management/authorization"
 )
 
-func setupRouter(group *ghttp.RouterGroup) {
+func setupRouter(ctx context.Context, server *ghttp.Server, cfg *Config) {
+	group := server.Group("/management")
+	middlewares := []ghttp.HandlerFunc{ghttp.MiddlewareCORS}
+	if cfg.Secret != "" {
+		middlewares = append(middlewares, authorization.VerifySignature(cfg.Secret))
+	} else {
+		g.Log().Warningf(ctx, "management check signature is disalbed, check management.secret in config.yml")
+	}
+	if cfg.IpWhitelist != "" {
+		middlewares = append(middlewares, authorization.CheckIpWhitelist(cfg.IpWhitelist))
+	}
+	group.Middleware(middlewares...)
+
 	serverManagementRouters(group)
 }
 

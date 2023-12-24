@@ -9,3 +9,5 @@ management:
   address:
   port: 9999
   enabled: true
+  secret: "123456"
+  ip_whitelist: "" # e.g. "127.0.0.1,192.168.1.2"

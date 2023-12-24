@@ -48,7 +48,7 @@ func setup(ctx context.Context, cfg *Config) {
 	if cfg.Port > 0 && cfg.Port < 65535 {
 		server.SetPort(cfg.Port)
 	}
-	setupRouter(server.Group("/management"))
+	setupRouter(ctx, server, cfg)
 
 	server.SetDumpRouterMap(debug)
 	g.Log().Infof(ctx, "%s loaded on %s:%d", serverIdentity, cfg.Address, cfg.Port)
