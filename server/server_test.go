@@ -1,9 +1,11 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/junqirao/gateway/lib/response"
 	"github.com/junqirao/gateway/model"
 	"testing"
 	"time"
@@ -55,9 +57,9 @@ func runTestServer() {
 func buildHandler(path string, responseData interface{}, status int) (string, ghttp.HandlerFunc) {
 	return path, func(r *ghttp.Request) {
 		r.Response.WriteHeader(status)
-		r.Response.WriteJson(model.JSONResponse{
-			Data: responseData,
-			Msg:  fmt.Sprintf("router: %v", path),
+		r.Response.WriteJson(response.JSON{
+			Data:    responseData,
+			Message: fmt.Sprintf("router: %v", path),
 		})
 	}
 }
@@ -65,11 +67,56 @@ func buildHandler(path string, responseData interface{}, status int) (string, gh
 func TestRegister(t *testing.T) {
 	go runTestServer()
 
-	Register(&srd)
+	RegisterService(&srd)
 	runDefaultServer()
 }
 
 func TestInit(t *testing.T) {
 	Init()
 	time.Sleep(time.Second)
+}
+
+func TestStopStart(t *testing.T) {
+	name := "test"
+	srv := g.Server(name)
+	config := &model.ServerConfig{
+		Address: ":7777",
+	}
+	err := srv.SetConfig(config.C(name))
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	instance := NewInstance(name, config)
+	for i := 0; i < 3; i++ {
+		t.Log("i = ", i)
+		if err = instance.Start(context.Background()); err != nil {
+			t.Fatal(err)
+			return
+		}
+
+		if err = instance.Stop(context.Background()); err != nil {
+			t.Fatal(err)
+			return
+		}
+	}
+}
+
+func TestStopStartRaw(t *testing.T) {
+	server := g.Server("test")
+
+	for i := 0; i < 3; i++ {
+		t.Log("i = ", i)
+		err := server.Start()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		err = server.Shutdown()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+	}
 }

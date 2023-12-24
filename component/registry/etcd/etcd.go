@@ -69,8 +69,6 @@ func (i *instance) Subscribe(ctx context.Context, key string, handler event.Watc
 			case <-ctx.Done():
 				handler.OnClose(nil)
 				return
-			default:
-
 			}
 		}
 	}()
