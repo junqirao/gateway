@@ -1,23 +1,25 @@
 package service
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/junqirao/gateway/component/registry"
 	"github.com/junqirao/gateway/lib/response"
 	"github.com/junqirao/gateway/model"
 	"testing"
 )
 
 var (
-	srd = model.ServiceRegisterData{
-		ServerGroup: model.ServerGroup{
-			ServerName: "",
-			Group: &model.GroupInfo{
-				Name: "/api/v1",
-			},
+	srd = model.NodeRegisterData{
+		ServerGroup: &model.ServerGroup{
+			ServerName:  "",
+			ServiceName: "v1",
+			GroupName:   "api",
 		},
-		Service: model.ServiceInfo{
+		Node: &model.NodeInfo{
 			Name:     "test",
 			Protocol: "http",
 			Host:     "127.0.0.1",
@@ -42,7 +44,7 @@ func runDefaultServer() {
 
 func runTestServer() {
 	server := g.Server("test")
-	server.SetPort(srd.Service.Port)
+	server.SetPort(srd.Node.Port)
 	server.Group("/", func(group *ghttp.RouterGroup) {
 		group.GET(buildHandler("/a", "123", 200))
 		group.GET(buildHandler("/b", "456", 200))
@@ -66,6 +68,33 @@ func buildHandler(path string, responseData interface{}, status int) (string, gh
 func TestRegister(t *testing.T) {
 	go runTestServer()
 
-	Register(&srd)
+	// SubmitChanges(&srd)
 	runDefaultServer()
+}
+
+func TestInit(t *testing.T) {
+	marshal, _ := json.Marshal(srd)
+	err := registry.Instance().Set(context.TODO(), fmt.Sprintf("%s%s", registryKey, "test"), string(marshal))
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	Init()
+	groups.Range(func(key, value any) bool {
+		fmt.Println("key = ", key)
+		group := value.(*Group)
+		fmt.Println("group.Name = ", group.Name)
+		group.services.Range(func(k, v any) bool {
+			service := v.(*Service)
+			fmt.Println("service.Name = ", service.Name)
+			fmt.Println("service.lb = ", service.lb)
+			fmt.Println("service.nodes.length = ", len(service.nodes))
+			for i, node := range service.nodes {
+				marshal, _ := json.Marshal(node)
+				fmt.Println("service.nodes[", i, "] = ", string(marshal))
+			}
+			return true
+		})
+		return true
+	})
 }

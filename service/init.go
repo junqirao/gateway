@@ -20,6 +20,6 @@ func loadFromRegistry(ctx context.Context) {
 	}
 
 	for name, s := range cfgMap {
-		registryConfigHandler(ctx, name, s)
+		registryHandler(ctx, name, s, true)
 	}
 }

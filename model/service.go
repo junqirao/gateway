@@ -1,23 +1,42 @@
 package model
 
 import (
+	"github.com/junqirao/gateway/component/registry"
 	"strings"
 )
 
 // ServerGroup ...
 type ServerGroup struct {
-	ServerName string     `json:"server_name"`
-	Group      *GroupInfo `json:"group"`
+	Operation   registry.Operation `json:"operation"`
+	ServerName  string             `json:"server_name"`
+	ServiceName string             `json:"service_name"`
+	GroupName   string             `json:"group_name"`
+	LB          *LoadBalance       `json:"load_balance"` // updatable
 }
 
-// ServiceRegisterData ...
-type ServiceRegisterData struct {
-	ServerGroup
-	Service ServiceInfo `json:"service_info"` // service info
+// LoadBalance ...
+type LoadBalance struct {
+	Strategy string `json:"strategy"`
+}
+
+// NodeRegisterData ...
+type NodeRegisterData struct {
+	ServerGroup *ServerGroup       `json:"server_group"`
+	Operation   registry.Operation `json:"operation"`           // group operation
+	Node        *NodeInfo          `json:"node_info,omitempty"` // node info
+}
+
+// NodeInfo ...
+type NodeInfo struct {
+	Name     string                 `json:"name"`
+	Protocol string                 `json:"protocol"`
+	Host     string                 `json:"host"`
+	Port     int                    `json:"port"`
+	Meta     map[string]interface{} `json:"meta"`
 }
 
 // RouterPattern returns router pattern in /{group.name}/{service.name}/*
-func (d *ServiceRegisterData) RouterPattern() string {
+func (i NodeInfo) RouterPattern(groupName, serviceName string) string {
 	builder := strings.Builder{}
 	builder.WriteString("/")
 	add := func(name string) {
@@ -28,22 +47,8 @@ func (d *ServiceRegisterData) RouterPattern() string {
 			builder.WriteString(s + "/")
 		}
 	}
-	add(d.Group.Name)
-	add(d.Service.Name)
+	add(groupName)
+	add(serviceName)
 	builder.WriteString("*")
 	return builder.String()
-}
-
-// GroupInfo info
-type GroupInfo struct {
-	Name string `json:"name"`
-}
-
-// ServiceInfo ...
-type ServiceInfo struct {
-	Name     string                 `json:"name"`
-	Protocol string                 `json:"protocol"`
-	Host     string                 `json:"host"`
-	Port     int                    `json:"port"`
-	Meta     map[string]interface{} `json:"meta"`
 }

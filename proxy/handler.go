@@ -17,18 +17,18 @@ import (
 
 // Handler of proxy
 type Handler struct {
-	srvInfo model.ServiceInfo
-	proxy   httputil.ReverseProxy
-	prefix  string
-	dialer  *net.Dialer
+	nodeInfo *model.NodeInfo
+	proxy    httputil.ReverseProxy
+	prefix   string
+	dialer   *net.Dialer
 }
 
 // NewHandler of proxy
-func NewHandler(srv *model.ServiceRegisterData) *Handler {
+func NewHandler(ni *model.NodeInfo, prefix string) *Handler {
 	h := &Handler{
-		srvInfo: srv.Service,
-		proxy:   httputil.ReverseProxy{},
-		prefix:  strings.TrimSuffix(srv.RouterPattern(), "/*"),
+		nodeInfo: ni,
+		proxy:    httputil.ReverseProxy{},
+		prefix:   prefix,
 		dialer: &net.Dialer{
 			Timeout:   3 * time.Second,
 			KeepAlive: 30 * time.Second,
@@ -55,12 +55,12 @@ func (h *Handler) Proxy(r *ghttp.Request) {
 }
 
 func (h *Handler) director(req *http.Request) {
-	targetHost := h.srvInfo.Host
-	if h.srvInfo.Port > 0 {
-		targetHost += fmt.Sprintf(":%d", h.srvInfo.Port)
+	targetHost := h.nodeInfo.Host
+	if h.nodeInfo.Port > 0 {
+		targetHost += fmt.Sprintf(":%d", h.nodeInfo.Port)
 	}
 
-	req.URL.Scheme = h.srvInfo.Protocol
+	req.URL.Scheme = h.nodeInfo.Protocol
 	req.URL.Host = targetHost
 	req.URL.Path = parseProxyPath(req.URL.Path, h.prefix)
 	req.URL.RawPath = parseProxyPath(req.URL.RawPath, h.prefix)

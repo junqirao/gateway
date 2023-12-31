@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/junqirao/gateway/management"
 	"github.com/junqirao/gateway/server"
+	"github.com/junqirao/gateway/service"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,6 +13,7 @@ import (
 
 func main() {
 	server.Init()
+	service.Init()
 	management.Init()
 
 	graceExit()

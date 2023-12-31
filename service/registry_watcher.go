@@ -9,7 +9,7 @@ type serviceRegistryWatcher struct{}
 
 // OnChange ...
 func (serviceRegistryWatcher) OnChange(key string, value []byte) {
-	registryConfigHandler(context.Background(), key, string(value))
+	registryHandler(context.Background(), key, string(value))
 }
 
 // OnClose ...

@@ -1,17 +1,44 @@
 package service
 
 import (
+	"github.com/junqirao/gateway/component/registry"
 	"github.com/junqirao/gateway/model"
-	"github.com/junqirao/gateway/proxy"
-	"github.com/junqirao/gateway/server"
+	"github.com/junqirao/gateway/service/balancer"
+	"github.com/junqirao/gateway/service/node"
+	"sync"
 )
 
-// Register service
-func Register(reg *model.ServiceRegisterData) {
-	h := proxy.NewHandler(reg)
-	instance, ok := server.GetInstance(reg.ServerName)
-	if !ok || instance.Srv() == nil {
+// Service ...
+type Service struct {
+	mu    sync.RWMutex
+	group *Group
+	Name  string
+	nodes []*node.Node
+	lb    balancer.Balancer
+}
+
+func (s *Service) UpdateOrCreateNode(ni *model.NodeInfo, op registry.Operation) {
+	if s == nil || ni == nil || op.IsEmpty() {
 		return
 	}
-	instance.Srv().BindHandler(reg.RouterPattern(), h.Proxy)
+
+	defer func() {
+		s.lb.Update(s.nodes)
+	}()
+
+	for i, n := range s.nodes {
+		if n.Name == ni.Name {
+			if op.IsDelete() {
+				s.nodes = append(s.nodes[:i], s.nodes[i+1:]...)
+				return
+			} else if op.IsUpdate() {
+				s.nodes[i] = node.New(s.group.Name, s.Name, ni)
+				return
+			} else {
+				return
+			}
+		}
+	}
+
+	s.nodes = append(s.nodes, node.New(s.group.Name, s.Name, ni))
 }
