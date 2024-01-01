@@ -4,25 +4,36 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/junqirao/gateway/component/registry"
 	"github.com/junqirao/gateway/model"
+	"strings"
 )
 
-var (
-	registryKey = g.Cfg().MustGet(context.Background(), "registry.identity", "local.undefined").String() + "/service/registry/"
-)
+// nodeRegistryHandler ...
+func nodeRegistryHandler(ctx context.Context, name, cfgStr string) {
+	// name : server.group.service.node_name
+	parts := strings.Split(name, ".")
+	if len(parts) < 4 {
+		return
+	}
 
-// registryHandler ...
-func registryHandler(ctx context.Context, name, cfgStr string, create ...bool) {
-	// name : node_name
+	serverName := parts[0]
+	groupName := parts[1]
+	serviceName := parts[2]
+	nodeName := parts[3]
+	group := CreateOrGetGroup(serverName, groupName)
+
 	var err error
 	if cfgStr == "" {
+		// unregister
+		if service, ok := group.findService(serviceName); ok {
+			service.RemoveNode(nodeName)
+		}
 		return
 	}
 
 	sc := new(model.NodeRegisterData)
 	if err = json.Unmarshal([]byte(cfgStr), &sc); err != nil {
-		g.Log().Warningf(ctx, "load service registry data [%s](value=%s) failed: %v", name, cfgStr, err)
+		g.Log().Warningf(ctx, "load node registry data [%s](value=%s) failed: %v", name, cfgStr, err)
 		return
 	}
 
@@ -30,12 +41,6 @@ func registryHandler(ctx context.Context, name, cfgStr string, create ...bool) {
 		return
 	}
 
-	nodeOp := sc.Operation
-	if len(create) > 0 && create[0] {
-		nodeOp = registry.OperationUpdate
-	}
-	CreateOrGetGroup(sc.ServerGroup.ServerName, sc.ServerGroup.GroupName).
-		SubmitChanges(sc.ServerGroup).
-		UpdateOrCreateNode(sc.Node, nodeOp)
+	group.CreateOrGetService(sc.ServerGroup).UpdateOrCreateNode(sc.Node)
 	return
 }

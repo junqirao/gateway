@@ -10,11 +10,11 @@ func Init() {
 	loadFromRegistry(context.Background())
 
 	// watcher
-	registry.Instance().Subscribe(context.TODO(), configRegistryKey, new(serverConfigWatcher))
+	registry.Instance().Subscribe(context.TODO(), registry.ServerConfigRegPath(), new(serverConfigWatcher))
 }
 
 func loadFromRegistry(ctx context.Context) {
-	cfgMap, err := registry.Instance().Get(ctx, configRegistryKey)
+	cfgMap, err := registry.Instance().Get(ctx, registry.ServerConfigRegPath())
 	if err != nil {
 		return
 	}

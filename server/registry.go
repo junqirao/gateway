@@ -7,10 +7,6 @@ import (
 	"github.com/junqirao/gateway/model"
 )
 
-var (
-	configRegistryKey = g.Cfg().MustGet(context.Background(), "registry.identity", "local.undefined").String() + "/server/config/"
-)
-
 func registryConfigHandler(ctx context.Context, name, cfgStr string) {
 	var err error
 	if cfgStr == "" {

@@ -35,7 +35,7 @@ func (r *Router) Route(request *ghttp.Request) {
 		r.unavailable(request)
 		return
 	}
-	service, ok := group.Service(sName)
+	service, ok := group.findService(sName)
 	if !ok {
 		r.unavailable(request)
 		return

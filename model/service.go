@@ -1,17 +1,19 @@
 package model
 
 import (
-	"github.com/junqirao/gateway/component/registry"
+	"fmt"
 	"strings"
 )
 
 // ServerGroup ...
 type ServerGroup struct {
-	Operation   registry.Operation `json:"operation"`
-	ServerName  string             `json:"server_name"`
-	ServiceName string             `json:"service_name"`
-	GroupName   string             `json:"group_name"`
-	LB          *LoadBalance       `json:"load_balance"` // updatable
+	// position
+	ServerName  string `json:"server_name"`
+	GroupName   string `json:"group_name"`
+	ServiceName string `json:"service_name"`
+
+	// config
+	LB *LoadBalance `json:"load_balance"` // updatable
 }
 
 // LoadBalance ...
@@ -21,9 +23,13 @@ type LoadBalance struct {
 
 // NodeRegisterData ...
 type NodeRegisterData struct {
-	ServerGroup *ServerGroup       `json:"server_group"`
-	Operation   registry.Operation `json:"operation"`           // group operation
-	Node        *NodeInfo          `json:"node_info,omitempty"` // node info
+	ServerGroup *ServerGroup `json:"server_group"`
+	Node        *NodeInfo    `json:"node_info,omitempty"` // node info
+}
+
+// RegistryKey ...
+func (n *NodeRegisterData) RegistryKey() string {
+	return fmt.Sprintf("%s.%s.%s.%s", n.ServerGroup.ServerName, n.ServerGroup.GroupName, n.ServerGroup.ServiceName, n.Node.Name)
 }
 
 // NodeInfo ...

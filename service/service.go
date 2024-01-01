@@ -1,7 +1,8 @@
 package service
 
 import (
-	"github.com/junqirao/gateway/component/registry"
+	"context"
+	"fmt"
 	"github.com/junqirao/gateway/model"
 	"github.com/junqirao/gateway/proxy/balancer"
 	"github.com/junqirao/gateway/proxy/node"
@@ -18,8 +19,8 @@ type Service struct {
 }
 
 // UpdateOrCreateNode ...
-func (s *Service) UpdateOrCreateNode(ni *model.NodeInfo, op registry.Operation) {
-	if s == nil || ni == nil || op.IsEmpty() {
+func (s *Service) UpdateOrCreateNode(ni *model.NodeInfo) {
+	if s == nil || ni == nil {
 		return
 	}
 
@@ -31,22 +32,43 @@ func (s *Service) UpdateOrCreateNode(ni *model.NodeInfo, op registry.Operation) 
 
 	for i, n := range s.nodes {
 		if n.Name == ni.Name {
-			if op.IsDelete() {
-				s.nodes = append(s.nodes[:i], s.nodes[i+1:]...)
-				return
-			} else if op.IsUpdate() {
-				s.nodes[i] = node.New(s.group.Name, s.Name, ni)
-				return
-			} else {
-				return
-			}
+			// update
+			s.nodes[i] = node.New(s.group.Name, s.Name, ni)
+			s.log("update node: %s", ni.Name)
+			return
 		}
 	}
 
+	// create
 	s.nodes = append(s.nodes, node.New(s.group.Name, s.Name, ni))
+	s.log("create node: %s", ni.Name)
+}
+
+// RemoveNode ...
+func (s *Service) RemoveNode(name string) {
+	s.mu.Lock()
+	defer func() {
+		s.lb.Update(s.nodes)
+		s.mu.Unlock()
+	}()
+
+	for i, n := range s.nodes {
+		if n.Name == name {
+			s.nodes = append(s.nodes[:i], s.nodes[i+1:]...)
+		}
+	}
+	s.log("remove node: %s", name)
+
+	if len(s.nodes) == 0 {
+		s.group.removeService(s.Name)
+	}
 }
 
 // Select node
 func (s *Service) Select() *node.Node {
 	return s.lb.Select()
+}
+
+func (s *Service) log(v string, vs ...interface{}) {
+	logger.Infof(context.TODO(), "[group:%s][service:%s][%v] %s", s.group.Name, s.Name, len(s.nodes), fmt.Sprintf(v, vs...))
 }

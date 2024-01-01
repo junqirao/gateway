@@ -5,14 +5,14 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-type serviceRegistryWatcher struct{}
+type nodeRegistryWatcher struct{}
 
 // OnChange ...
-func (serviceRegistryWatcher) OnChange(key string, value []byte) {
-	registryHandler(context.Background(), key, string(value))
+func (nodeRegistryWatcher) OnChange(key string, value []byte) {
+	nodeRegistryHandler(context.Background(), key, string(value))
 }
 
 // OnClose ...
-func (serviceRegistryWatcher) OnClose(err error) {
+func (nodeRegistryWatcher) OnClose(err error) {
 	g.Log().Warningf(context.Background(), "service config watcher closed: %v", err)
 }

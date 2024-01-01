@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/junqirao/gateway/component/registry"
 	"github.com/junqirao/gateway/lib/response"
@@ -14,7 +13,7 @@ import (
 func ListServerInfo(ctx context.Context) (infos []*model.ServerInfo, err error) {
 	infos = make([]*model.ServerInfo, 0)
 
-	cfgMap, err := registry.Instance().Get(ctx, configRegistryKey)
+	cfgMap, err := registry.Instance().Get(ctx, registry.ServerConfigRegPath())
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +37,7 @@ func ListServerInfo(ctx context.Context) (infos []*model.ServerInfo, err error) 
 // GetServerInfo server info
 func GetServerInfo(ctx context.Context, name string) (rsp interface{}, err error) {
 	cfg := new(model.ServerConfig)
-	if err = getRegistryOne(ctx, fmt.Sprintf("%s%s", configRegistryKey, name), &cfg); err != nil {
+	if err = getRegistryOne(ctx, registry.ServerConfigRegKey(name), &cfg); err != nil {
 		return
 	}
 	rsp = &model.ServerInfo{
@@ -73,19 +72,22 @@ func getRegistryOne(ctx context.Context, key string, ptr interface{}) (err error
 
 // DeleteConfig ...
 func DeleteConfig(ctx context.Context, name string) (rsp interface{}, err error) {
-	if err = getRegistryOne(ctx, fmt.Sprintf("%s%s", configRegistryKey, name), nil); err != nil {
+	key := registry.ServerConfigRegKey(name)
+	if err = getRegistryOne(ctx, key, nil); err != nil {
 		return
 	}
 
-	return name, registry.Instance().Delete(ctx, fmt.Sprintf("%s%s", configRegistryKey, name))
+	return name, registry.Instance().Delete(ctx, key)
 }
 
 // SetConfig ...
 func SetConfig(ctx context.Context, name string, config *model.ServerConfig) (rsp interface{}, err error) {
+	key := registry.ServerConfigRegKey(name)
+
 	if config.Properties == nil {
 		// update enabled only
 		raw := new(model.ServerConfig)
-		if err = getRegistryOne(ctx, fmt.Sprintf("%s%s", configRegistryKey, name), &raw); err != nil {
+		if err = getRegistryOne(ctx, key, &raw); err != nil {
 			return
 		}
 		raw.Enabled = config.Enabled
@@ -93,5 +95,5 @@ func SetConfig(ctx context.Context, name string, config *model.ServerConfig) (rs
 	} else {
 		config.FillDefault()
 	}
-	return name, registry.Instance().Set(ctx, fmt.Sprintf("%s%s", configRegistryKey, name), config)
+	return name, registry.Instance().Set(ctx, key, config)
 }

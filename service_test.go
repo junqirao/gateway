@@ -23,7 +23,7 @@ var (
 			Address: ":80",
 		},
 	}
-	srd = model.NodeRegisterData{
+	nrd = model.NodeRegisterData{
 		ServerGroup: &model.ServerGroup{
 			ServerName:  serverName,
 			ServiceName: "v1",
@@ -54,7 +54,7 @@ func runDefaultServer() {
 
 func runTestServer(t *testing.T) {
 	srv := g.Server("test")
-	srv.SetPort(srd.Node.Port)
+	srv.SetPort(nrd.Node.Port)
 	srv.Group("/", func(group *ghttp.RouterGroup) {
 		group.Middleware(func(r *ghttp.Request) {
 			fmt.Println("[test_server.middleware] request url :", r.Request.URL.String())
@@ -66,7 +66,7 @@ func runTestServer(t *testing.T) {
 			fmt.Println("recv callback body: " + string(r.GetBody()))
 		})
 	})
-	t.Log("test server started at: ", srd.Node.Port)
+	t.Log("test server started at: ", nrd.Node.Port)
 	srv.Run()
 }
 
@@ -83,7 +83,7 @@ func buildHandler(path string, responseData interface{}, status int) (string, gh
 func TestRegister(t *testing.T) {
 	go runTestServer(t)
 
-	// SubmitChanges(&srd)
+	// SubmitChanges(&nrd)
 	runDefaultServer()
 }
 
@@ -100,7 +100,7 @@ func TestInit(t *testing.T) {
 	// 	group := value.(*Group)
 	// 	fmt.Println("group.Name = ", group.Name)
 	// 	group.services.Range(func(k, v any) bool {
-	// 		service := v.(*Service)
+	// 		service := v.(*findService)
 	// 		fmt.Println("service.Name = ", service.Name)
 	// 		fmt.Println("service.lb = ", service.lb)
 	// 		fmt.Println("service.nodes.length = ", len(service.nodes))
@@ -114,17 +114,17 @@ func TestInit(t *testing.T) {
 	// })
 }
 
-func TestRegistryWriteService(t *testing.T) {
-	serviceRegistryKey := g.Cfg().MustGet(context.Background(), "registry.identity", "local.undefined").String() + "/service/registry/"
-
-	marshal, _ := json.Marshal(srd)
-	err := registry.Instance().Set(context.TODO(), fmt.Sprintf("%s%s", serviceRegistryKey, "test"), string(marshal))
+func TestRegisterNode(t *testing.T) {
+	marshal, _ := json.Marshal(nrd)
+	err := registry.Instance().Set(context.TODO(), registry.NodeRegKey(nrd.RegistryKey()), string(marshal))
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
+}
 
-	_, err = server.SetConfig(context.Background(), serverName, &sc)
+func TestUnRegisterNode(t *testing.T) {
+	err := registry.Instance().Delete(context.TODO(), registry.NodeRegKey(nrd.RegistryKey()))
 	if err != nil {
 		t.Fatal(err)
 		return
