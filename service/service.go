@@ -17,6 +17,7 @@ type Service struct {
 	lb    balancer.Balancer
 }
 
+// UpdateOrCreateNode ...
 func (s *Service) UpdateOrCreateNode(ni *model.NodeInfo, op registry.Operation) {
 	if s == nil || ni == nil || op.IsEmpty() {
 		return
@@ -41,4 +42,9 @@ func (s *Service) UpdateOrCreateNode(ni *model.NodeInfo, op registry.Operation) 
 	}
 
 	s.nodes = append(s.nodes, node.New(s.group.Name, s.Name, ni))
+}
+
+// Select node
+func (s *Service) Select() *node.Node {
+	return s.lb.Select()
 }

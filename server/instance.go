@@ -8,7 +8,7 @@ import (
 	"github.com/gogf/gf/v2/util/guid"
 	"github.com/junqirao/gateway/lib/response"
 	"github.com/junqirao/gateway/model"
-	"github.com/junqirao/gateway/proxy"
+	"github.com/junqirao/gateway/service"
 	"sync"
 )
 
@@ -100,13 +100,14 @@ func (i *Instance) Start(ctx context.Context) (err error) {
 	if i.srv.Status() == ghttp.ServerStatusRunning {
 		return
 	}
+
+	i.srv.BindHandler("/*", service.NewRouter(i.name).Route)
 	if err = i.srv.Start(); err != nil {
 		g.Log().Warningf(ctx, "failed to start server: %v", err)
 		return
 	}
 
-	i.srv.BindHandler("*/**", proxy.NewRouter().Route)
-	g.Log().Infof(ctx, "server started: %v", i.name)
+	g.Log().Infof(ctx, "server started: %v @ %v", i.name, i.cfg.Properties.Address)
 	return
 }
 

@@ -34,6 +34,8 @@ func registryHandler(ctx context.Context, name, cfgStr string, create ...bool) {
 	if len(create) > 0 && create[0] {
 		nodeOp = registry.OperationUpdate
 	}
-	CreateOrGetGroup(sc.ServerGroup.GroupName).SubmitChanges(sc.ServerGroup).UpdateOrCreateNode(sc.Node, nodeOp)
+	CreateOrGetGroup(sc.ServerGroup.ServerName, sc.ServerGroup.GroupName).
+		SubmitChanges(sc.ServerGroup).
+		UpdateOrCreateNode(sc.Node, nodeOp)
 	return
 }
