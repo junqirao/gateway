@@ -2,7 +2,7 @@ package balancer
 
 import (
 	"github.com/junqirao/gateway/model"
-	"github.com/junqirao/gateway/service/node"
+	"github.com/junqirao/gateway/proxy/node"
 )
 
 const (

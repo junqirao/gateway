@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/gogf/gf/v2/net/ghttp"
+	"net/http"
 	"strings"
 )
 
@@ -44,7 +45,7 @@ func (r *Router) Route(request *ghttp.Request) {
 }
 
 func (r *Router) unavailable(request *ghttp.Request, reason ...string) {
-	request.Response.WriteHeader(503)
+	request.Response.WriteHeader(http.StatusServiceUnavailable)
 	body := "unavailable: " + request.URL.Path
 	if len(reason) > 0 && reason[0] != "" {
 		body = reason[0]

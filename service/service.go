@@ -3,8 +3,8 @@ package service
 import (
 	"github.com/junqirao/gateway/component/registry"
 	"github.com/junqirao/gateway/model"
-	"github.com/junqirao/gateway/service/balancer"
-	"github.com/junqirao/gateway/service/node"
+	"github.com/junqirao/gateway/proxy/balancer"
+	"github.com/junqirao/gateway/proxy/node"
 	"sync"
 )
 
@@ -23,8 +23,10 @@ func (s *Service) UpdateOrCreateNode(ni *model.NodeInfo, op registry.Operation) 
 		return
 	}
 
+	s.mu.Lock()
 	defer func() {
 		s.lb.Update(s.nodes)
+		s.mu.Unlock()
 	}()
 
 	for i, n := range s.nodes {

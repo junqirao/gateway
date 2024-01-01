@@ -1,7 +1,7 @@
 package balancer
 
 import (
-	"github.com/junqirao/gateway/service/node"
+	"github.com/junqirao/gateway/proxy/node"
 	"math/rand"
 	"time"
 )

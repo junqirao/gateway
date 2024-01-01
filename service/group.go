@@ -2,8 +2,8 @@ package service
 
 import (
 	"github.com/junqirao/gateway/model"
-	"github.com/junqirao/gateway/service/balancer"
-	"github.com/junqirao/gateway/service/node"
+	"github.com/junqirao/gateway/proxy/balancer"
+	"github.com/junqirao/gateway/proxy/node"
 	"strings"
 	"sync"
 )
