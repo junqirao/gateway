@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/junqirao/gateway/pkg/model"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 // RegistryType ...
@@ -15,7 +18,7 @@ const (
 )
 
 const (
-	path = "/node/"
+	path = "node/"
 )
 
 // Register of gateway nodes
@@ -52,4 +55,21 @@ func New(t RegistryType, cfg Config, opts ...Option) (register Register, err err
 		return nil, fmt.Errorf("unknown registry type: %s", t)
 	}
 	return register, nil
+}
+
+// Automatic register and unregister, by listening os exist signal, it will block
+func Automatic(ctx context.Context, t RegistryType, cfg Config, nrd *model.NodeRegisterData, opts ...Option) (err error) {
+	register, err := New(t, cfg, opts...)
+	if err != nil {
+		return
+	}
+
+	if err = register.Register(ctx, nrd); err != nil {
+		return
+	}
+
+	osc := make(chan os.Signal, 1)
+	signal.Notify(osc, syscall.SIGTERM, syscall.SIGINT)
+	<-osc
+	return register.Unregister(ctx, nrd)
 }

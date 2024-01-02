@@ -4,7 +4,9 @@ import (
 	"context"
 	"github.com/junqirao/gateway/pkg/model"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"os"
 	"testing"
+	"time"
 )
 
 var (
@@ -41,7 +43,9 @@ func newRegister(t *testing.T) {
 	var err error
 	register, err = New(TypeEtcd, func() interface{} {
 		return etcdCfg
-	}, WithLogger(nil), WithIdentity(identity))
+	}, WithLogger(nil),
+		WithRegistryIdentity(identity),
+		WithNodeIdentity("t1"))
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -64,4 +68,19 @@ func TestUnRegister(t *testing.T) {
 	if err := register.Unregister(context.Background(), &nrd); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestAutomatic(t *testing.T) {
+	go func() {
+		err := Automatic(context.Background(), TypeEtcd, func() interface{} {
+			return etcdCfg
+		}, &nrd, WithRegistryIdentity(identity))
+		if err != nil {
+			t.Error(err)
+			return
+		}
+	}()
+
+	t.Log("wait 20 seconds, please kill this process pid =", os.Getpid())
+	time.Sleep(time.Second * 20)
 }

@@ -14,12 +14,19 @@ func WithLogger(logger Logger) Option {
 	}
 }
 
-// WithIdentity set identity, it will be used in registry path like "/<identity>/node/<name>"
-func WithIdentity(identity string) Option {
+// WithRegistryIdentity set registryIdentity, it will be used in registry path like "/<registryIdentity>/node/<name>.<nodeIdentity>"
+func WithRegistryIdentity(identity string) Option {
 	return func(nr *etcdNodeRegister) {
-		nr.identity = identity
-		if !strings.HasSuffix(nr.identity, "/") {
-			nr.identity += "/"
+		nr.registryIdentity = identity
+		if !strings.HasSuffix(nr.registryIdentity, "/") {
+			nr.registryIdentity += "/"
 		}
+	}
+}
+
+// WithNodeIdentity set nodeIdentity it will be used in node path like "/<registryIdentity>/node/<name>.<nodeIdentity>"
+func WithNodeIdentity(identity string) Option {
+	return func(nr *etcdNodeRegister) {
+		nr.nodeIdentity = identity
 	}
 }
